@@ -1,4 +1,5 @@
-import { createContext, useState } from 'react';
+import { createContext, useReducer } from 'react';
+import { createAction } from 'utils/reducers/reducers.utils';
 
 const removeCartItem = (items, item) =>
 	items.filter(cartItem => cartItem.id !== item.id);
@@ -36,16 +37,65 @@ export const CartContext = createContext({
 	cartItems: [],
 });
 
+const CART_REDUCER_ACTIONS = {
+	SET_CART_ITEMS: 'SET_CART_ITEMS',
+	SET_IS_CART_OPEN: 'SET_IS_CART_OPEN',
+};
+
+const cartReducer = (state, action) => {
+	const { type, payload } = action;
+
+	switch (type) {
+		case CART_REDUCER_ACTIONS.SET_CART_ITEMS:
+			return {
+				...state,
+				cartItems: payload,
+			};
+		case CART_REDUCER_ACTIONS.SET_IS_CART_OPEN:
+			return {
+				...state,
+				isCartOpen: payload,
+			};
+		default:
+			throw new Error(`Unhandled action ${type} in Cart Reducer`);
+	}
+};
+
+const INITIAL_STATE = {
+	cartItems: [],
+	isCartOpen: false,
+};
+
 export const CartProvider = ({ children }) => {
-	const [isCartOpen, setIsCartOpen] = useState(false);
-	const [cartItems, setCartItems] = useState([]);
+	const [{ isCartOpen, cartItems }, dispatch] = useReducer(
+		cartReducer,
+		INITIAL_STATE
+	);
 
 	const addProductToCart = product =>
-		setCartItems(incrementCartItem(cartItems, product));
+		dispatch(
+			createAction(
+				CART_REDUCER_ACTIONS.SET_CART_ITEMS,
+				incrementCartItem(cartItems, product)
+			)
+		);
 	const removeProductFromCart = product =>
-		setCartItems(decrementCartItem(cartItems, product));
+		dispatch(
+			createAction(
+				CART_REDUCER_ACTIONS.SET_CART_ITEMS,
+				decrementCartItem(cartItems, product)
+			)
+		);
 	const clearItemFromCart = cartItem =>
-		setCartItems(removeCartItem(cartItems, cartItem));
+		dispatch(
+			createAction(
+				CART_REDUCER_ACTIONS.SET_CART_ITEMS,
+				removeCartItem(cartItems, cartItem)
+			)
+		);
+	const setIsCartOpen = bool => {
+		dispatch(createAction(CART_REDUCER_ACTIONS.SET_IS_CART_OPEN, bool));
+	};
 
 	const value = {
 		isCartOpen,
