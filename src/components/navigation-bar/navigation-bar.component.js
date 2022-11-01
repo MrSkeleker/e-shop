@@ -1,21 +1,28 @@
-import { useContext } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { ReactComponent as Logo } from 'assets/crown.svg';
-import { UserContext } from 'contexts/user.context';
 import { signOutUser } from 'utils/firebase/firebase.utils';
 
-import './navigation.styles.js';
 import CartIcon from 'components/cart-icon/cart-icon.component';
-import { CartContext } from 'contexts/cart.context';
 import CartDropdown from 'components/cart-dropdown/card-dropdown.component';
-import { LogoContainer, NavigationContainer, NavLink, NavLinksContainer } from './navigation.styles.js';
+import { setCurrentUser } from 'store/user/user.action.js';
+import { selectCurrentUser } from 'store/user/user.selector.js';
+
+import {
+	LogoContainer,
+	NavigationContainer,
+	NavLink,
+	NavLinksContainer,
+} from './navigation.styles.js';
+import { selectIsCartOpen } from 'store/cart/cart.selector.js';
 
 const NavigationBar = () => {
-	const { currentUser, setCurrentUser } = useContext(UserContext);
-	const { isCartOpen } = useContext(CartContext);
+	const dispatch = useDispatch();
+	const currentUser = useSelector(selectCurrentUser);
+	const isCartOpen = useSelector(selectIsCartOpen);
 
 	const signOutHandler = async () => {
 		await signOutUser();
-		setCurrentUser(null);
+		dispatch(setCurrentUser(null));
 	};
 
 	return (
@@ -24,17 +31,13 @@ const NavigationBar = () => {
 				<Logo className='logo' />
 			</LogoContainer>
 			<NavLinksContainer>
-				<NavLink to='/shop'>
-					Shop
-				</NavLink>
+				<NavLink to='/shop'>Shop</NavLink>
 				{currentUser ? (
 					<NavLink as='span' onClick={signOutHandler}>
 						Sign Out
 					</NavLink>
 				) : (
-					<NavLink to='/auth'>
-						Sign In
-					</NavLink>
+					<NavLink to='/auth'>Sign In</NavLink>
 				)}
 				<CartIcon />
 			</NavLinksContainer>

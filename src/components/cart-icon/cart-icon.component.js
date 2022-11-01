@@ -1,6 +1,9 @@
-import { CartContext } from 'contexts/cart.context';
-import { useContext, useEffect, useState } from 'react';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { setIsCartOpen } from 'store/cart/cart.action.js';
+import {
+	selectIsCartOpen,
+	selectTotalQunatity,
+} from 'store/cart/cart.selector.js';
 import {
 	CartIconContainer,
 	ItemCount,
@@ -8,21 +11,16 @@ import {
 } from './cart-icon.styles.js';
 
 const CartIcon = () => {
-	const [counter, setCounter] = useState(0);
-	const { isCartOpen, setIsCartOpen, cartItems } = useContext(CartContext);
+	const dispatch = useDispatch();
+	const totalQuantity = useSelector(selectTotalQunatity);
+	const isCartOpen = useSelector(selectIsCartOpen);
 
-	const toggleIsCartOpen = () => setIsCartOpen(!isCartOpen);
-
-	useEffect(() => {
-		setCounter(
-			cartItems.reduce((total, cartItem) => total + cartItem.quantity, 0)
-		);
-	}, [cartItems, setCounter]);
+	const toggleIsCartOpen = () => dispatch(setIsCartOpen(!isCartOpen));
 
 	return (
 		<CartIconContainer onClick={toggleIsCartOpen}>
 			<ShoppingIcon />
-			<ItemCount>{counter}</ItemCount>
+			<ItemCount>{totalQuantity}</ItemCount>
 		</CartIconContainer>
 	);
 };
